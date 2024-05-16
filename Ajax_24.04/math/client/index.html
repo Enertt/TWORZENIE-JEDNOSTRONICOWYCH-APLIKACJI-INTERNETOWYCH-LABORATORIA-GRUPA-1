@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculator</title>
+  </head>
+  <body>
+    <div>
+      <h1>Calculator</h1>
+      <form>
+        x = <input type="text" id="x" /> y = <input type="text" id="y" />
+        <input type="button" id="calc_xhr" value="Call API (XHR)" />
+        <input type="button" id="calc_fetch" value="Call API (Fetch)" />
+      </form>
+      x + y = <span id="sum"></span><br />
+      x - y = <span id="difference"></span><br />
+      x * y = <span id="product"></span><br />
+      x / y = <span id="quotient"></span><br />
+    </div>
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("calc_xhr").addEventListener("click", () => {
+          calculateWithXHR();
+        });
+
+        document.getElementById("calc_fetch").addEventListener("click", () => {
+          calculateWithFetch();
+        });
+
+        function calculateWithXHR() {
+          var x = document.getElementById("x").value;
+          var y = document.getElementById("y").value;
+
+          var xhr = new XMLHttpRequest();
+          xhr.onload = function () {
+            if (xhr.status == 200) {
+              var resp = xhr.response;
+              document.getElementById("sum").textContent = resp.sum;
+              document.getElementById("product").textContent = resp.product;
+              document.getElementById("difference").textContent =
+                resp.difference;
+              document.getElementById("quotient").textContent = resp.quotient;
+            }
+          };
+          xhr.responseType = "json";
+          xhr.open("POST", "/math");
+          xhr.setRequestHeader("Content-Type", "application/json");
+          xhr.send(JSON.stringify({ x: x, y: y }));
+        }
+
+        function calculateWithFetch() {
+          var x = document.getElementById("x").value;
+          var y = document.getElementById("y").value;
+
+          fetch("/math", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ x: x, y: y }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              document.getElementById("sum").textContent = data.sum;
+              document.getElementById("product").textContent = data.product;
+              document.getElementById("difference").textContent =
+                data.difference;
+              document.getElementById("quotient").textContent = data.quotient;
+            })
+            .catch((error) => console.error("Error:", error));
+        }
+      });
+    </script>
+  </body>
+</html>
